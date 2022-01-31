@@ -18,7 +18,9 @@ const newBidListener = (AuctionContract, currentBlockNumber, web3, client) => {
         }
       )
       .on('connected', function (subscriptionId) {
-        console.log(`Connection Opened with subscription ID, ${subscriptionId}!`)
+        console.log(
+          `Connection Opened with subscription ID, ${subscriptionId}!`
+        );
       })
       .on('data', function (event) {
         const bidAmount = web3.utils.fromWei(
@@ -52,15 +54,15 @@ const newBidListener = (AuctionContract, currentBlockNumber, web3, client) => {
 
         client.guilds.cache
           .get(SECRETS.GUILD_ID)
-          .channels.cache.get(SECRETS.RAID_SWAP_ALERT_CHANNEL_ID)
+          .channels.cache.get(SECRETS.BIDS_ALERT_CHANNEL_ID)
           .send({ embeds: [embed] });
       })
       .on('error', function (error, receipt) {
-        if (error) console.log(error)
-        if (receipt) console.log(receipt)
+        if (error) console.log(error);
+        if (receipt) console.log(receipt);
       });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in new bid listener.');
   }
 };
@@ -83,7 +85,9 @@ const bidIncreaseListener = (
         }
       )
       .on('connected', function (subscriptionId) {
-        console.log(`Connection Opened with subscription ID, ${subscriptionId}!`)
+        console.log(
+          `Connection Opened with subscription ID, ${subscriptionId}!`
+        );
       })
       .on('data', function (event) {
         const newAmount = web3.utils.fromWei(
@@ -112,15 +116,15 @@ const bidIncreaseListener = (
 
         client.guilds.cache
           .get(SECRETS.GUILD_ID)
-          .channels.cache.get(SECRETS.RAID_SWAP_ALERT_CHANNEL_ID)
+          .channels.cache.get(SECRETS.BIDS_ALERT_CHANNEL_ID)
           .send({ embeds: [embed] });
       })
       .on('error', function (error, receipt) {
-        if (error) console.log(error)
-        if (receipt) console.log(receipt)
+        if (error) console.log(error);
+        if (receipt) console.log(receipt);
       });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in bid increase listener.');
   }
 };
@@ -133,12 +137,14 @@ const bidAccepted = (AuctionContract, currentBlockNumber, client) => {
           fromBlock: currentBlockNumber
         },
         function (error, event) {
-          if (error) console.log(error)
-          if (event) console.log(event)
+          if (error) console.log(error);
+          if (event) console.log(event);
         }
       )
       .on('connected', function (subscriptionId) {
-        console.log(`Connection Opened with subscription ID, ${subscriptionId}!`)
+        console.log(
+          `Connection Opened with subscription ID, ${subscriptionId}!`
+        );
       })
       .on('data', function (event) {
         const { acceptedBy } = event.returnValues;
@@ -164,15 +170,15 @@ const bidAccepted = (AuctionContract, currentBlockNumber, client) => {
 
         client.guilds.cache
           .get(SECRETS.GUILD_ID)
-          .channels.cache.get(SECRETS.RAID_SWAP_ALERT_CHANNEL_ID)
+          .channels.cache.get(SECRETS.BIDS_ALERT_CHANNEL_ID)
           .send({ embeds: [embed] });
       })
       .on('error', function (error, receipt) {
-        if (error) console.log(error)
+        if (error) console.log(error);
         if (receipt) console.log(receipt);
       });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in bid accepted listener.');
   }
 };
@@ -207,7 +213,7 @@ const subscribeEvent = async (client) => {
     bidIncreaseListener(AuctionContract, currentBlockNumber, web3, client);
     bidAccepted(AuctionContract, currentBlockNumber, client);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in bids listener.');
   }
 };
