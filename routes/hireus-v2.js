@@ -22,13 +22,13 @@ HIREUS_V2_ROUTER.post('/awaiting-raids', async (req, res) => {
     );
     return res.json(rows);
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in awaiting-raids route.');
     return res.json(err);
   }
 });
 
-HIREUS_V2_ROUTER.post('/consultation', async (req, res) => {
+HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
   let { selectedDay } = req.body;
 
   if (selectedDay === '') {
@@ -37,95 +37,35 @@ HIREUS_V2_ROUTER.post('/consultation', async (req, res) => {
     selectedDay = new Date(selectedDay).toLocaleDateString();
   }
 
-  const data = {
-    Name: req.body.name,
-    Email: req.body.email,
-    Bio: req.body.bio,
-    'Telegram Handle': req.body.telegramHandle,
-    'Discord Handle': req.body.discordHandle,
-    'Twitter Handle': req.body.twitterHandle,
-    'Preferred Contact Method': req.body.contactType,
-    'Project Type': req.body.projectType,
-    'Project Specs': req.body.projectSpecs,
-    'Specs Link': req.body.specsLink,
-    'Project Name': req.body.projectName,
-    'Project Description': req.body.projectDescription,
-    'Services Required': req.body.servicesRequired,
-    'Expected Deadline': selectedDay,
-    'Budget Range': req.body.budgetRange,
-    'Additional Information': req.body.specificInfo,
-    Priorities: req.body.priority,
-    'Consultation Hash': req.body.transaction_hash
-  };
-
-  try {
-    const response = await raids_v2_table.create(data);
-    res.json(response);
-  } catch (err) {
-    console.log(err)
-    discordLogger('Error caught in creating a new consultation record.');
-    res.json('ERROR');
-  }
-
   try {
     const embed = new Discord.MessageEmbed()
       .setColor('#ff3864')
-      .setTitle(
-        req.body.transaction_hash !== 'not paid'
-          ? 'Paid Submission'
-          : 'Unpaid Submission'
-      )
+      .setTitle(req.body.project_name)
       .setURL(
-        req.body.transaction_hash !== 'not paid'
-          ? `https://etherscan.io/tx/${req.body.transaction_hash}`
-          : null
+        `https://blockscout.com/xdai/mainnet/tx/${req.body.submission_hash}`
       )
       .setAuthor(req.body.name)
       .addFields(
         {
-          name: 'Project Name',
-          value: req.body.projectName
-        },
-        {
           name: 'Project Type',
-          value: req.body.projectType
+          value: req.body.project_type
         },
         {
           name: 'Specs Link',
-          value: req.body.specsLink || 'None Provided'
+          value: req.body.project_link || 'None Provided'
         },
 
         {
           name: 'Budget Range',
-          value: req.body.budgetRange
+          value: req.body.budget_range
         },
         {
           name: 'Services Required',
-          value: req.body.servicesRequired.toString()
-        },
-        {
-          name: 'Priority',
-          value: req.body.priority
-        },
-        {
-          name: 'Email',
-          value: req.body.email
+          value: req.body.services_needed.toString()
         },
         {
           name: 'Discord',
-          value: req.body.discordHandle || 'Not Provided'
-        },
-        {
-          name: 'Twitter Handle',
-          value: req.body.twitterHandle || 'Not Provided'
-        },
-        {
-          name: 'Telegram Handle',
-          value: req.body.telegramHandle || 'Not Provided'
-        },
-        {
-          name: 'Preffered Contact Channel',
-          value: req.body.contactType
+          value: req.body.discord || 'Not Provided'
         }
       )
       .setTimestamp();
@@ -135,7 +75,7 @@ HIREUS_V2_ROUTER.post('/consultation', async (req, res) => {
       .channels.cache.get(SECRETS.CLIENT_SUBMISSION_CHANNEL_ID)
       .send({ embeds: [embed] });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in posting client submission notification.');
   }
 });
@@ -154,7 +94,7 @@ HIREUS_V2_ROUTER.post('/feedback', async (req, res) => {
 
     res.json('SUCCESS');
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in posting feedback data to database.');
     res.json('ERROR');
   }
@@ -183,7 +123,7 @@ HIREUS_V2_ROUTER.post('/feedback', async (req, res) => {
       .channels.cache.get(SECRETS.WHISPERS_CHANNEL_ID)
       .send({ embeds: [embed] });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in posting client submission feedback.');
   }
 });
