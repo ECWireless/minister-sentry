@@ -74,6 +74,8 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
       .get(SECRETS.GUILD_ID)
       .channels.cache.get(SECRETS.CLIENT_SUBMISSION_CHANNEL_ID)
       .send({ embeds: [embed] });
+
+    res.send('success');
   } catch (err) {
     console.log(err);
     discordLogger('Error caught in posting client submission notification.');
