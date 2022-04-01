@@ -81,16 +81,7 @@ const createServer = () => {
       '/escrow',
       (req, res, next) => {
         req.CLIENT = client;
-        const { authorization } = req.headers;
-        const token = authorization && authorization.split(' ')[1];
-        if (token !== null) {
-          try {
-            verify(token, CONFIG.JWT_SECRET);
-            next();
-          } catch (err) {
-            return;
-          }
-        }
+        next();
       },
       ESCROW_ROUTER
     );
