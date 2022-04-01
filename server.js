@@ -1,4 +1,5 @@
 const { Client, Intents } = require('discord.js');
+const { verify } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
@@ -44,7 +45,16 @@ const createServer = () => {
       '/hireus-v2',
       (req, res, next) => {
         req.CLIENT = client;
-        if (req.body.key === SECRETS.ROUTE_ACCESS_KEY) next();
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, CONFIG.JWT_SECRET);
+            next();
+          } catch (err) {
+            return;
+          }
+        }
       },
       HIREUS_V2_ROUTER
     );
@@ -53,7 +63,16 @@ const createServer = () => {
       '/joinus',
       (req, res, next) => {
         req.CLIENT = client;
-        if (req.body.key === SECRETS.ROUTE_ACCESS_KEY) next();
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, CONFIG.JWT_SECRET);
+            next();
+          } catch (err) {
+            return;
+          }
+        }
       },
       JOINUS_ROUTER
     );
@@ -62,7 +81,16 @@ const createServer = () => {
       '/escrow',
       (req, res, next) => {
         req.CLIENT = client;
-        next();
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, CONFIG.JWT_SECRET);
+            next();
+          } catch (err) {
+            return;
+          }
+        }
       },
       ESCROW_ROUTER
     );
@@ -72,7 +100,7 @@ const createServer = () => {
     });
 
     app.listen(process.env.PORT || 5000, () =>
-    console.log(`Server Listening on port ${process.env.PORT || 5000}..`)
+      console.log(`Server Listening on port ${process.env.PORT || 5000}..`)
     );
   });
 
