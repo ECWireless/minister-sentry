@@ -49,7 +49,7 @@ const createServer = () => {
         const token = authorization && authorization.split(' ')[1];
         if (token !== null) {
           try {
-            verify(token, CONFIG.JWT_SECRET);
+            verify(token, SECRETS.JWT_SECRET);
             next();
           } catch (err) {
             return;
@@ -67,7 +67,7 @@ const createServer = () => {
         const token = authorization && authorization.split(' ')[1];
         if (token !== null) {
           try {
-            verify(token, CONFIG.JWT_SECRET);
+            verify(token, SECRETS.JWT_SECRET);
             next();
           } catch (err) {
             return;
