@@ -5,7 +5,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const SECRETS = {
-  ROUTE_ACCESS_KEY: process.env.ROUTE_ACCESS_KEY,
   TOKEN: process.env.TOKEN,
   PG_DB: process.env.PG_DB,
   PG_HOST: process.env.PG_HOST,
@@ -23,7 +22,8 @@ const SECRETS = {
   MEMBER_ROLE_ID: process.env.MEMBER_ROLE_ID,
   BIDS_ALERT_CHANNEL_ID: process.env.BIDS_ALERT_CHANNEL_ID,
   COHORT_SUBMISSIONS_CHANNEL_ID: process.env.COHORT_SUBMISSIONS_CHANNEL_ID,
-  HQ_ANNOUNCEMENTS_CHANNEL_ID: process.env.HQ_ANNOUNCEMENTS_CHANNEL_ID
+  HQ_ANNOUNCEMENTS_CHANNEL_ID: process.env.HQ_ANNOUNCEMENTS_CHANNEL_ID,
+  JWT_SECRET: process.env.JWT_SECRET
 };
 
 const initPgClient = () => {

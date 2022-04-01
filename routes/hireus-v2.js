@@ -2,7 +2,7 @@ const express = require('express');
 const Discord = require('discord.js');
 const dotenv = require('dotenv');
 
-const { initPgClient, initAirtableClient } = require('../config');
+const { initPgClient } = require('../config');
 const { discordLogger } = require('../utils/logger');
 const { SECRETS } = require('../config');
 
@@ -10,8 +10,6 @@ dotenv.config();
 
 const client = initPgClient();
 client.connect();
-
-const raids_v2_table = initAirtableClient();
 
 const HIREUS_V2_ROUTER = express.Router();
 
@@ -79,54 +77,6 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
   } catch (err) {
     console.log(err);
     discordLogger('Error caught in posting client submission notification.');
-  }
-});
-
-HIREUS_V2_ROUTER.post('/feedback', async (req, res) => {
-  const { raidID, feedbackOne, feedbackTwo, rating } = req.body;
-
-  const data = {
-    'How did you hear about us?': feedbackOne,
-    'What can be better?': feedbackTwo,
-    Rating: Number(rating)
-  };
-
-  try {
-    await raids_v2_table.update(raidID, data);
-
-    res.json('SUCCESS');
-  } catch (err) {
-    console.log(err);
-    discordLogger('Error caught in posting feedback data to database.');
-    res.json('ERROR');
-  }
-
-  try {
-    const embed = new Discord.MessageEmbed()
-      .setColor('#ff3864')
-      .setTitle('New hireus feedback received')
-      .addFields(
-        {
-          name: 'Rating given.',
-          value: rating ? Number(rating) : 'Not provided.'
-        },
-        {
-          name: 'How the user heard about us?',
-          value: feedbackOne || 'Not provided.'
-        },
-        {
-          name: 'What can be better?',
-          value: feedbackTwo || 'Not provided.'
-        }
-      );
-
-    req.CLIENT.guilds.cache
-      .get(SECRETS.GUILD_ID)
-      .channels.cache.get(SECRETS.WHISPERS_CHANNEL_ID)
-      .send({ embeds: [embed] });
-  } catch (err) {
-    console.log(err);
-    discordLogger('Error caught in posting client submission feedback.');
   }
 });
 
