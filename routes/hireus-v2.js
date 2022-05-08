@@ -39,9 +39,6 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
     const embed = new Discord.MessageEmbed()
       .setColor('#ff3864')
       .setTitle(req.body.project_name)
-      .setURL(
-        `https://blockscout.com/xdai/mainnet/tx/${req.body.submission_hash}`
-      )
       .setAuthor(req.body.name)
       .addFields(
         {
@@ -67,6 +64,14 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
         }
       )
       .setTimestamp();
+
+    if (req.body.submission_hash !== null) {
+      embed.setURL(
+        `https://blockscout.com/xdai/mainnet/tx/${req.body.submission_hash}`
+      );
+    } else {
+      embed.setFooter({ text: 'Submitted by a RaidGuild Member' });
+    }
 
     req.CLIENT.guilds.cache
       .get(SECRETS.GUILD_ID)
