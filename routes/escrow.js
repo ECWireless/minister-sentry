@@ -58,7 +58,15 @@ ESCROW_ROUTER.post('/update-invoice', async (req, res) => {
       'Invoice ID': Index
     };
 
-    await raids_v2_table.update(ID, data);
+    const recordToUpdate = await raids_v2_table
+      .select({
+        filterByFormula: `{Raid ID} = '${ID}'`
+      })
+      .firstPage();
+
+    const refId = recordToUpdate[0].fields['Ref ID'];
+    await raids_v2_table.update(refId, data);
+
     res.json('SUCCESS');
   } catch (err) {
     console.log(err);
