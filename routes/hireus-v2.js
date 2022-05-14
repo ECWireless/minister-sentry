@@ -40,6 +40,9 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
       .setColor('#ff3864')
       .setTitle(req.body.project_name)
       .setAuthor(req.body.name)
+      .setURL(
+        `https://dungeonmaster.raidguild.org/consultations/${req.body.consultation_id}`
+      )
       .addFields(
         {
           name: 'Project Type',
@@ -65,11 +68,7 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
       )
       .setTimestamp();
 
-    if (req.body.submission_hash !== null) {
-      embed.setURL(
-        `https://blockscout.com/xdai/mainnet/tx/${req.body.submission_hash}`
-      );
-    } else {
+    if (req.body.submission_hash == null) {
       embed.setFooter({ text: 'Submitted by a RaidGuild Member' });
     }
 
