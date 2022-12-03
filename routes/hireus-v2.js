@@ -41,7 +41,7 @@ HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
       .setTitle(req.body.project_name)
       .setAuthor(req.body.name)
       .setURL(
-        `https://dungeonmaster.raidguild.org/consultations/${req.body.consultation_id}`
+        `https://dm.raidguild.org/consultations/${req.body.consultation_id}`
       )
       .addFields(
         {
