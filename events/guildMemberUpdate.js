@@ -13,11 +13,11 @@ module.exports = {
         const embed = new MessageEmbed()
           .setColor('#ff3864')
           .setDescription(
-            `New member! Welcome to the Guild, <@${newMember.id}>!`
+            `New member! Welcome to the Guild, <@${newMember.id}>!`,
           );
 
         const channel = newMember.client.channels.cache.get(
-          SECRETS.HQ_ANNOUNCEMENTS_CHANNEL_ID
+          SECRETS.HQ_ANNOUNCEMENTS_CHANNEL_ID,
         );
 
         channel.send({ embeds: [embed] });
@@ -26,5 +26,5 @@ module.exports = {
       console.log(err);
       discordLogger('Error caught in guild member update event.');
     }
-  }
+  },
 };

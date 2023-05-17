@@ -15,5 +15,5 @@ module.exports = {
     setDiscordClient(client);
 
     createServer();
-  }
+  },
 };
