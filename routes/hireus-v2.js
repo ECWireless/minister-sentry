@@ -26,14 +26,6 @@ const HIREUS_V2_ROUTER = express.Router();
 // });
 
 HIREUS_V2_ROUTER.post('/submission', async (req, res) => {
-  let { selectedDay } = req.body;
-
-  if (selectedDay === '') {
-    selectedDay = new Date().toLocaleDateString();
-  } else {
-    selectedDay = new Date(selectedDay).toLocaleDateString();
-  }
-
   try {
     const embed = new Discord.MessageEmbed()
       .setColor('#ff3864')
