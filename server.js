@@ -1,5 +1,5 @@
 const { Client, Intents } = require('discord.js');
-// const { verify } = require("jsonwebtoken");
+const { verify } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
@@ -45,16 +45,17 @@ const createServer = () => {
       '/hireus-v2',
       (req, res, next) => {
         req.CLIENT = client;
-        // const { authorization } = req.headers;
-        // const token = authorization && authorization.split(" ")[1];
-        // if (token !== null) {
-        //   try {
-        //     verify(token, SECRETS.JWT_SECRET);
-        //     next();
-        //   } catch (err) {
-        //     return;
-        //   }
-        // }
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, SECRETS.JWT_SECRET);
+            next();
+          } catch (err) {
+            console.log(err);
+            return;
+          }
+        }
         next();
       },
       HIREUS_V2_ROUTER,

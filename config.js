@@ -23,7 +23,7 @@ const SECRETS = {
   // BIDS_ALERT_CHANNEL_ID: process.env.BIDS_ALERT_CHANNEL_ID,
   // COHORT_SUBMISSIONS_CHANNEL_ID: process.env.COHORT_SUBMISSIONS_CHANNEL_ID,
   // HQ_ANNOUNCEMENTS_CHANNEL_ID: process.env.HQ_ANNOUNCEMENTS_CHANNEL_ID,
-  // JWT_SECRET: process.env.JWT_SECRET,
+  JWT_SECRET: process.env.JWT_SECRET,
 };
 
 // const initPgClient = () => {
