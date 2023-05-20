@@ -1,12 +1,12 @@
 const { Client, Intents } = require('discord.js');
-const { verify } = require('jsonwebtoken');
+const { verify, sign } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
 // const PAYLOAD_ROUTER = require("./routes/payload");
 const HIREUS_V2_ROUTER = require('./routes/hireus-v2');
 // const ESCROW_ROUTER = require("./routes/escrow");
-// const JOINUS_ROUTER = require("./routes/joinus");
+const JOINUS_ROUTER = require('./routes/joinus');
 
 // const subscribeEvent = require("./features/bids");
 
@@ -61,23 +61,23 @@ const createServer = () => {
       HIREUS_V2_ROUTER,
     );
 
-    // app.use(
-    //   "/joinus",
-    //   (req, res, next) => {
-    //     req.CLIENT = client;
-    //     const { authorization } = req.headers;
-    //     const token = authorization && authorization.split(" ")[1];
-    //     if (token !== null) {
-    //       try {
-    //         verify(token, SECRETS.JWT_SECRET);
-    //         next();
-    //       } catch (err) {
-    //         return;
-    //       }
-    //     }
-    //   },
-    //   JOINUS_ROUTER
-    // );
+    app.use(
+      '/joinus',
+      (req, res, next) => {
+        req.CLIENT = client;
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, SECRETS.JWT_SECRET);
+            next();
+          } catch (err) {
+            return;
+          }
+        }
+      },
+      JOINUS_ROUTER,
+    );
 
     // app.use(
     //   "/escrow",

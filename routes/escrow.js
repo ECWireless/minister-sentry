@@ -17,7 +17,7 @@ ESCROW_ROUTER.post('/validate-raid', async (req, res) => {
 
     const result = await raids_v2_table
       .select({
-        filterByFormula: `{Raid ID} = '${req.body.ID}'`
+        filterByFormula: `{Raid ID} = '${req.body.ID}'`,
       })
       .firstPage();
 
@@ -38,7 +38,7 @@ ESCROW_ROUTER.post('/update-raid', async (req, res) => {
     const { ID, Hash, Index } = req.body;
     const data = {
       'Locker Hash': Hash,
-      'Escrow Index': Index
+      'Escrow Index': Index,
     };
 
     await raids_v2_table.update(ID, data);
@@ -55,12 +55,12 @@ ESCROW_ROUTER.post('/update-invoice', async (req, res) => {
     const { ID, Hash, Index } = req.body;
     const data = {
       'Locker Hash': Hash,
-      'Invoice ID': Index
+      'Invoice ID': Index,
     };
 
     const recordToUpdate = await raids_v2_table
       .select({
-        filterByFormula: `{Raid ID} = '${ID}'`
+        filterByFormula: `{Raid ID} = '${ID}'`,
       })
       .firstPage();
 
@@ -86,12 +86,12 @@ ESCROW_ROUTER.post('/notify-spoils', async (req, res) => {
       .addFields(
         {
           name: 'Guild Spoils',
-          value: `${guildShare} ${token}`
+          value: `${guildShare} ${token}`,
         },
         {
           name: 'Raid Party Share',
-          value: `${raidPartyShare} ${token}`
-        }
+          value: `${raidPartyShare} ${token}`,
+        },
       );
 
     req.CLIENT.guilds.cache
