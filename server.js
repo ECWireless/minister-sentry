@@ -1,5 +1,5 @@
 const { Client, Intents } = require('discord.js');
-const { verify, sign } = require('jsonwebtoken');
+const { verify } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
