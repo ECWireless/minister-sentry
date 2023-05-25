@@ -7,6 +7,7 @@ const cors = require('cors');
 const HIREUS_V2_ROUTER = require('./routes/hireus-v2');
 // const ESCROW_ROUTER = require("./routes/escrow");
 const JOINUS_ROUTER = require('./routes/joinus');
+const HASURA_ROUTER = require('./routes/hasura');
 
 // const subscribeEvent = require("./features/bids");
 
@@ -77,6 +78,24 @@ const createServer = () => {
         }
       },
       JOINUS_ROUTER,
+    );
+
+    app.use(
+      '/hasura',
+      (req, res, next) => {
+        req.CLIENT = client;
+        const { authorization } = req.headers;
+        const token = authorization && authorization.split(' ')[1];
+        if (token !== null) {
+          try {
+            verify(token, SECRETS.JWT_SECRET);
+            next();
+          } catch (err) {
+            return;
+          }
+        }
+      },
+      HASURA_ROUTER,
     );
 
     // app.use(
