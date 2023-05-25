@@ -7,8 +7,8 @@ const HASURA_ROUTER = express.Router();
 
 HASURA_ROUTER.post('/create-channels', async (req, res) => {
   console.log('create-channels');
-  const { data } = req.body;
-  console.log(data.new);
+  const { event } = req.body;
+  console.log(event?.data?.new);
 
   return res.status(200).send('OK');
 });
