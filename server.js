@@ -88,12 +88,9 @@ const createServer = () => {
         const token = authorization && authorization.split(' ')[1];
         if (token !== null) {
           try {
-            const requestURL = req.url;
-            console.log(requestURL);
-
-            // if (requestURL !== SECRETS.HAURA_EVENT_URL) {
-            //   return res.status(403).json({ error: 'Forbidden' });
-            // }
+            if (token !== SECRETS.HASURA_EVENTS_API_TOKEN) {
+              return res.status(403).json({ error: 'Forbidden' });
+            }
             next();
           } catch (err) {
             return;
