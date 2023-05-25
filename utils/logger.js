@@ -1,10 +1,10 @@
 let discordClient = '';
 
-const setDiscordClient = (_client) => {
+const setDiscordClient = _client => {
   discordClient = _client;
 };
 
-const discordLogger = (_msg) => {
+const discordLogger = _msg => {
   if (discordClient) {
     try {
       discordClient.guilds.cache
@@ -12,12 +12,12 @@ const discordLogger = (_msg) => {
         .channels.cache.get(process.env.COMMAND_CENTER_ID)
         .send({ content: _msg });
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 };
 
 module.exports = {
   setDiscordClient,
-  discordLogger
+  discordLogger,
 };

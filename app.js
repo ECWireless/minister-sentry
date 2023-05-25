@@ -12,15 +12,15 @@ const client = new Client({
     Intents.FLAGS.GUILD_MEMBERS,
     Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     Intents.FLAGS.DIRECT_MESSAGES,
-    Intents.FLAGS.GUILD_INVITES
-  ]
+    Intents.FLAGS.GUILD_INVITES,
+  ],
 });
 
 // creating events reader
 const eventFiles = fs
   .readdirSync('./events')
-  .filter((file) => file.endsWith('.js'));
-eventFiles.forEach((file) => {
+  .filter(file => file.endsWith('.js'));
+eventFiles.forEach(file => {
   const event = require(`./events/${file}`);
   if (event.once) {
     client.once(event.name, (...args) => event.execute(...args));

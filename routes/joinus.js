@@ -23,7 +23,7 @@ JOINUS_ROUTER.post('/application', async (req, res) => {
     availability,
     bio,
     goals,
-    passion
+    passion,
   } = req.body;
 
   try {
@@ -34,40 +34,40 @@ JOINUS_ROUTER.post('/application', async (req, res) => {
       .addFields(
         {
           name: 'Discord',
-          value: discord || 'N/A'
+          value: discord || 'N/A',
         },
         {
           name: 'Twitter',
-          value: twitter || 'N/A'
+          value: twitter || 'N/A',
         },
         {
           name: 'Class Type',
-          value: class_type
+          value: class_type,
         },
         {
           name: 'Bio',
-          value: trimString(bio, 1024)
+          value: trimString(bio, 1024),
         },
         {
           name: 'Goals',
-          value: trimString(goals, 1024)
+          value: trimString(goals, 1024),
         },
         {
           name: 'Passion',
-          value: trimString(passion, 1024)
+          value: trimString(passion, 1024),
         },
         {
           name: 'Experience in Crypto',
-          value: crypto_exp.toString()
+          value: crypto_exp.toString(),
         },
         {
           name: 'Primary Skills',
-          value: primary_skills
+          value: primary_skills,
         },
         {
           name: 'Availability',
-          value: availability
-        }
+          value: availability,
+        },
       )
       .setTimestamp();
 
@@ -77,7 +77,7 @@ JOINUS_ROUTER.post('/application', async (req, res) => {
       .send({ embeds: [embed] });
     res.json('SUCCESS');
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in posting client submission notification.');
     res.json('ERROR');
   }

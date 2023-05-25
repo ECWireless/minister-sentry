@@ -9,8 +9,8 @@ module.exports = {
         anonymousSuggestion(message);
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       discordLogger('Error caught in message event.');
     }
-  }
+  },
 };

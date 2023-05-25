@@ -3,12 +3,12 @@ const { verify } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
-const PAYLOAD_ROUTER = require('./routes/payload');
+// const PAYLOAD_ROUTER = require("./routes/payload");
 const HIREUS_V2_ROUTER = require('./routes/hireus-v2');
-const ESCROW_ROUTER = require('./routes/escrow');
+// const ESCROW_ROUTER = require("./routes/escrow");
 const JOINUS_ROUTER = require('./routes/joinus');
 
-const subscribeEvent = require('./features/bids');
+// const subscribeEvent = require("./features/bids");
 
 const { SECRETS } = require('./config');
 
@@ -20,26 +20,26 @@ const createServer = () => {
       Intents.FLAGS.GUILD_MESSAGES,
       Intents.FLAGS.GUILD_MEMBERS,
       Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-      Intents.FLAGS.DIRECT_MESSAGES
-    ]
+      Intents.FLAGS.DIRECT_MESSAGES,
+    ],
   });
 
   client.once('ready', () => {
-    subscribeEvent(client);
+    // subscribeEvent(client);
 
     const app = express();
 
     app.use(express.json());
     app.use(cors());
 
-    app.use(
-      '/payload',
-      (req, res, next) => {
-        req.CLIENT = client;
-        next();
-      },
-      PAYLOAD_ROUTER
-    );
+    // app.use(
+    //   "/payload",
+    //   (req, res, next) => {
+    //     req.CLIENT = client;
+    //     next();
+    //   },
+    //   PAYLOAD_ROUTER
+    // );
 
     app.use(
       '/hireus-v2',
@@ -52,11 +52,13 @@ const createServer = () => {
             verify(token, SECRETS.JWT_SECRET);
             next();
           } catch (err) {
+            console.log(err);
             return;
           }
         }
+        next();
       },
-      HIREUS_V2_ROUTER
+      HIREUS_V2_ROUTER,
     );
 
     app.use(
@@ -74,24 +76,24 @@ const createServer = () => {
           }
         }
       },
-      JOINUS_ROUTER
+      JOINUS_ROUTER,
     );
 
-    app.use(
-      '/escrow',
-      (req, res, next) => {
-        req.CLIENT = client;
-        next();
-      },
-      ESCROW_ROUTER
-    );
+    // app.use(
+    //   "/escrow",
+    //   (req, res, next) => {
+    //     req.CLIENT = client;
+    //     next();
+    //   },
+    //   ESCROW_ROUTER
+    // );
 
     app.get('/', (req, res) => {
       res.send('Hi');
     });
 
-    app.listen(process.env.PORT || 5000, () =>
-      console.log(`Server Listening on port ${process.env.PORT || 5000}..`)
+    app.listen(process.env.PORT || 8080, () =>
+      console.log(`Server Listening on port ${process.env.PORT || 8080}..`),
     );
   });
 

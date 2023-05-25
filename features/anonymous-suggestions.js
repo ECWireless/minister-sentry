@@ -7,16 +7,16 @@ const titles = [
   'Someone whispered this.',
   "There's a gossip.",
   'Someone murmured.',
-  'I hear people say this.'
+  'I hear people say this.',
 ];
 
-const anonymousSuggestion = (message) => {
+const anonymousSuggestion = message => {
   try {
     const invocation = message.content.split(' ');
     if (invocation[0] !== 'whisper') return;
 
     const channel = message.client.channels.cache.get(
-      SECRETS.WHISPERS_CHANNEL_ID
+      SECRETS.WHISPERS_CHANNEL_ID,
     );
 
     const whispered_message = message.content.split(' ');
@@ -29,7 +29,7 @@ const anonymousSuggestion = (message) => {
 
     channel.send({ embeds: [embed] });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in anonymous suggestions feature.');
   }
 };

@@ -43,7 +43,7 @@ PAYLOAD_ROUTER.post('/', (req, res) => {
 
     res.send('Received');
   } catch (err) {
-    console.log(err)
+    console.log(err);
     discordLogger('Error caught in proposal alert.');
   }
 });
