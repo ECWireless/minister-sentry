@@ -6,7 +6,7 @@ dotenv.config();
 const HASURA_ROUTER = express.Router();
 
 HASURA_ROUTER.post('/create-channels', async (req, res) => {
-  console.log(req);
+  console.log(req.url);
   const { name } = req.body;
   console.log(name);
 
