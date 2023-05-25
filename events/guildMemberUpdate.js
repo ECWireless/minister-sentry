@@ -5,8 +5,6 @@ const { discordLogger } = require('../utils/logger');
 module.exports = {
   name: 'guildMemberUpdate',
   async execute(oldMember, newMember) {
-    console.log('guildMemberUpdate');
-
     try {
       if (
         !oldMember.roles.cache.has(SECRETS.MEMBER_ROLE_ID) &&
