@@ -242,7 +242,7 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
     }
 
     await whoIsAvailableChannel.send(
-      `The role <@${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details at https://dm.raidguild.org/raids/${raid_id}`,
+      `The role <@&${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details at https://dm.raidguild.org/raids/${raid_id}`,
     );
 
     return res.json('SUCCESS');
