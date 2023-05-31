@@ -266,25 +266,17 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
 
 HASURA_ROUTER.post('/raider-added', async (req, res) => {
   const { member_id, raid_id } = req.body;
-  const {
-    HASURA_GRAPHQL_ENDPOINT,
-    HASURA_GRAPHQL_ADMIN_SECRET,
-    WHO_IS_AVAILABLE_CHANNEL_ID,
-  } = SECRETS;
+  const { HASURA_GRAPHQL_ENDPOINT, HASURA_GRAPHQL_ADMIN_SECRET } = SECRETS;
 
   if (!member_id || !raid_id) {
     discordLogger('ERROR: missing request data.');
     return res.json('ERROR: Missing member_id or raid_id');
   }
 
-  if (
-    !HASURA_GRAPHQL_ENDPOINT ||
-    !HASURA_GRAPHQL_ADMIN_SECRET ||
-    !WHO_IS_AVAILABLE_CHANNEL_ID
-  ) {
+  if (!HASURA_GRAPHQL_ENDPOINT || !HASURA_GRAPHQL_ADMIN_SECRET) {
     discordLogger('ERROR: missing envs.');
     return res.json(
-      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET or WHO_IS_AVAILABLE_CHANNEL_ID env variables',
+      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET env variables',
     );
   }
 
@@ -353,6 +345,28 @@ HASURA_ROUTER.post('/raider-added', async (req, res) => {
     discordLogger(
       'ERROR: issue notifying raid channel about new raider in party.',
     );
+    return res.json('ERROR');
+  }
+});
+
+HASURA_ROUTER.post('/status-updated', async (req, res) => {
+  const { status_key, raid_channel_id } = req.body;
+
+  if (!status_key || !raid_channel_id) {
+    discordLogger('ERROR: missing request data.');
+    return res.json('ERROR: Missing status_key or raid_channel_id');
+  }
+
+  try {
+    const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
+    await raidChannel.send(
+      `The status of this raid has been updated to: ${status_key}`,
+    );
+
+    return res.json('SUCCESS');
+  } catch (err) {
+    console.log(err);
+    discordLogger('ERROR: issue sending raid status update notification.');
     return res.json('ERROR');
   }
 });
