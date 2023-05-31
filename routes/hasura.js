@@ -6,6 +6,7 @@ const axios = require('axios');
 const { discordLogger } = require('../utils/logger');
 const { SECRETS } = require('../config');
 const { getUserbyUsername } = require('../lib/users');
+const { rolesHasuraToDiscord } = require('../utils/constants');
 
 dotenv.config();
 
@@ -157,23 +158,97 @@ HASURA_ROUTER.post('/cleric-added', async (req, res) => {
     const clericDiscordUsername =
       response.data.data.members[0].contact_info.discord.split('#')[0];
 
-    const clericDiscordUserId = await getUserbyUsername(
+    const clericDiscordUser = await getUserbyUsername(
       clericDiscordUsername,
       req.CLIENT,
     );
 
-    if (!clericDiscordUserId) {
+    if (!clericDiscordUser) {
       return res.json('ERROR: Could not find cleric in discord');
     }
 
     const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
     await raidChannel.send(
-      `New cleric added to raid: <@${clericDiscordUserId}>`,
+      `New cleric added to raid: <@${clericDiscordUser.id}>`,
     );
+
     return res.json('SUCCESS');
   } catch (err) {
     console.log(err);
     discordLogger('Error sending new cleric notification.');
+    return res.json('ERROR');
+  }
+});
+
+HASURA_ROUTER.post('/role-added', async (req, res) => {
+  const { role, raid_id } = req.body;
+  const {
+    HASURA_GRAPHQL_ENDPOINT,
+    HASURA_GRAPHQL_ADMIN_SECRET,
+    WHO_IS_AVAILABLE_CHANNEL_ID,
+  } = SECRETS;
+
+  if (!role || !raid_id) {
+    return res.json('ERROR: Missing role or raid_id');
+  }
+
+  if (
+    !HASURA_GRAPHQL_ENDPOINT ||
+    !HASURA_GRAPHQL_ADMIN_SECRET ||
+    !WHO_IS_AVAILABLE_CHANNEL_ID
+  ) {
+    return res.json(
+      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET or WHO_IS_AVAILABLE_CHANNEL_ID env variables',
+    );
+  }
+
+  try {
+    const query = `
+      query RaidQuery {
+        raids(where: {id: {_eq: "${raid_id}"}}) {
+          name
+        }
+      }
+    `;
+
+    const headers = {
+      'x-hasura-admin-secret': HASURA_GRAPHQL_ADMIN_SECRET,
+    };
+
+    const response = await axios({
+      url: HASURA_GRAPHQL_ENDPOINT,
+      method: 'post',
+      headers,
+      data: {
+        query,
+      },
+    });
+
+    if (response.data.errors) {
+      console.log(response.data.errors);
+      return res.json('ERROR');
+    }
+
+    const { name } = response.data.data.raids[0];
+
+    const whoIsAvailableChannel = req.CLIENT.channels.cache.get(
+      WHO_IS_AVAILABLE_CHANNEL_ID,
+    );
+
+    const roleDiscordId = rolesHasuraToDiscord[role];
+
+    if (!roleDiscordId) {
+      return res.json('ERROR: Could not find role ID in discord');
+    }
+
+    await whoIsAvailableChannel.send(
+      `The role <@${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details at https://dm.raidguild.org/raids/${raid_id}`,
+    );
+
+    return res.json('SUCCESS');
+  } catch (err) {
+    console.log(err);
+    discordLogger('Error sending new role required notification.');
     return res.json('ERROR');
   }
 });
