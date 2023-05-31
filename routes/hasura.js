@@ -18,6 +18,7 @@ HASURA_ROUTER.post('/create-channels', async (req, res) => {
   const { HASURA_GRAPHQL_ENDPOINT, HASURA_GRAPHQL_ADMIN_SECRET } = SECRETS;
 
   if (!HASURA_GRAPHQL_ENDPOINT || !HASURA_GRAPHQL_ADMIN_SECRET) {
+    discordLogger('ERROR: missing envs.');
     return res.json(
       'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET env variables',
     );
@@ -99,15 +100,15 @@ HASURA_ROUTER.post('/create-channels', async (req, res) => {
 
     if (response.data.errors) {
       console.log(response.data.errors);
-      res.json('ERROR');
-      return;
+      discordLogger('ERROR: issue querying DM API.');
+      return res.json('ERROR');
     }
 
     return res.json('SUCCESS');
   } catch (err) {
     console.log(err);
-    discordLogger('Error creating new raid channels.');
-    return res.json('ERROR');
+    discordLogger('ERROR: issue creating new raid channels.');
+    return res.json('ERROR: Issue creating new raid channels');
   }
 });
 
@@ -116,10 +117,12 @@ HASURA_ROUTER.post('/cleric-added', async (req, res) => {
   const { HASURA_GRAPHQL_ENDPOINT, HASURA_GRAPHQL_ADMIN_SECRET } = SECRETS;
 
   if (!cleric_id || !raid_channel_id) {
+    discordLogger('ERROR: missing request data.');
     return res.json('ERROR: Missing cleric_id or raid_channel_id');
   }
 
   if (!HASURA_GRAPHQL_ENDPOINT || !HASURA_GRAPHQL_ADMIN_SECRET) {
+    discordLogger('ERROR: missing envs.');
     return res.json(
       'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET env variables',
     );
@@ -151,12 +154,16 @@ HASURA_ROUTER.post('/cleric-added', async (req, res) => {
 
     if (response.data.errors) {
       console.log(response.data.errors);
-      res.json('ERROR');
-      return;
+      discordLogger('ERROR: issue querying DM API.');
+      return res.json('ERROR');
     }
 
-    const clericDiscordUsername =
+    let clericDiscordUsername =
       response.data.data.members[0].contact_info.discord.split('#')[0];
+
+    if (clericDiscordUsername.includes('@')) {
+      clericDiscordUsername = clericDiscordUsername.split('@')[1];
+    }
 
     const clericDiscordUser = await getUserbyUsername(
       clericDiscordUsername,
@@ -164,6 +171,7 @@ HASURA_ROUTER.post('/cleric-added', async (req, res) => {
     );
 
     if (!clericDiscordUser) {
+      discordLogger('ERROR: could not find cleric in discord.');
       return res.json('ERROR: Could not find cleric in discord');
     }
 
@@ -189,6 +197,7 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
   } = SECRETS;
 
   if (!role || !raid_id) {
+    discordLogger('ERROR: missing request data.');
     return res.json('ERROR: Missing role or raid_id');
   }
 
@@ -226,6 +235,7 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
 
     if (response.data.errors) {
       console.log(response.data.errors);
+      discordLogger('ERROR: issue querying DM API.');
       return res.json('ERROR');
     }
 
@@ -238,6 +248,7 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
     const roleDiscordId = rolesHasuraToDiscord[role];
 
     if (!roleDiscordId) {
+      discordLogger('ERROR: could not find role ID in discord.');
       return res.json('ERROR: Could not find role ID in discord');
     }
 
@@ -248,7 +259,100 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
     return res.json('SUCCESS');
   } catch (err) {
     console.log(err);
-    discordLogger('Error sending new role required notification.');
+    discordLogger('ERROR: issue sending new role required notification.');
+    return res.json('ERROR');
+  }
+});
+
+HASURA_ROUTER.post('/raider-added', async (req, res) => {
+  const { member_id, raid_id } = req.body;
+  const {
+    HASURA_GRAPHQL_ENDPOINT,
+    HASURA_GRAPHQL_ADMIN_SECRET,
+    WHO_IS_AVAILABLE_CHANNEL_ID,
+  } = SECRETS;
+
+  if (!member_id || !raid_id) {
+    discordLogger('ERROR: missing request data.');
+    return res.json('ERROR: Missing member_id or raid_id');
+  }
+
+  if (
+    !HASURA_GRAPHQL_ENDPOINT ||
+    !HASURA_GRAPHQL_ADMIN_SECRET ||
+    !WHO_IS_AVAILABLE_CHANNEL_ID
+  ) {
+    discordLogger('ERROR: missing envs.');
+    return res.json(
+      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET or WHO_IS_AVAILABLE_CHANNEL_ID env variables',
+    );
+  }
+
+  try {
+    const query = `
+      query RaidQuery {
+        raids(where: {id: {_eq: "${raid_id}"}}) {
+          raid_channel_id
+        }
+        members(where: {id: {_eq: "${member_id}"}}) {
+          contact_info {
+            discord
+          }
+        }
+      }
+    `;
+
+    const headers = {
+      'x-hasura-admin-secret': HASURA_GRAPHQL_ADMIN_SECRET,
+    };
+
+    const response = await axios({
+      url: HASURA_GRAPHQL_ENDPOINT,
+      method: 'post',
+      headers,
+      data: {
+        query,
+      },
+    });
+
+    if (response.data.errors) {
+      console.log(response.data.errors);
+      discordLogger('ERROR: issue querying DM API.');
+      return res.json('ERROR: Issue querying DM API');
+    }
+
+    const { raid_channel_id } = response.data.data.raids[0];
+    const {
+      contact_info: { discord },
+    } = response.data.data.members[0];
+
+    let raiderDiscordUsername = discord.split('#')[0];
+
+    if (raiderDiscordUsername.includes('@')) {
+      raiderDiscordUsername = raiderDiscordUsername.split('@')[1];
+    }
+
+    const raiderDiscordUser = await getUserbyUsername(
+      raiderDiscordUsername,
+      req.CLIENT,
+    );
+
+    if (!raiderDiscordUser) {
+      discordLogger('ERROR: Could not find raider in discord.');
+      return res.json('ERROR: Could not find raider in discord');
+    }
+
+    const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
+    await raidChannel.send(
+      `A new raider has been added to the party: <@${raiderDiscordUser.id}>`,
+    );
+
+    return res.json('SUCCESS');
+  } catch (err) {
+    console.log(err);
+    discordLogger(
+      'ERROR: issue notifying raid channel about new raider in party.',
+    );
     return res.json('ERROR');
   }
 });
