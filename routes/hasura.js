@@ -350,17 +350,17 @@ HASURA_ROUTER.post('/raider-added', async (req, res) => {
 });
 
 HASURA_ROUTER.post('/status-updated', async (req, res) => {
-  const { status_key, raid_channel_id } = req.body;
+  const { id, status_key, raid_channel_id } = req.body;
 
-  if (!status_key || !raid_channel_id) {
+  if (!id || !status_key || !raid_channel_id) {
     discordLogger('ERROR: missing request data.');
-    return res.json('ERROR: Missing status_key or raid_channel_id');
+    return res.json('ERROR: Missing id or status_key or raid_channel_id');
   }
 
   try {
     const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
     await raidChannel.send(
-      `The status of this raid has been updated to: ${status_key}`,
+      `The status of this raid has been updated to: ${status_key}\n\nView raid details at https://dm.raidguild.org/raids/${id}`,
     );
 
     return res.json('SUCCESS');
