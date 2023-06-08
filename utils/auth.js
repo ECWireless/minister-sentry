@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 
-const { SECRETS } = require('./config');
+const { SECRETS } = require('../config');
 
 const verifySignature = req => {
   const signature = crypto
