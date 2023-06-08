@@ -75,6 +75,7 @@ JOINUS_ROUTER.post('/application', async (req, res) => {
       .get(SECRETS.GUILD_ID)
       .channels.cache.get(SECRETS.COHORT_SUBMISSIONS_CHANNEL_ID)
       .send({ embeds: [embed] });
+
     res.json('SUCCESS');
   } catch (err) {
     console.log(err);
