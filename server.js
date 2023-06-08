@@ -12,6 +12,7 @@ const HASURA_ROUTER = require('./routes/hasura');
 // const subscribeEvent = require("./features/bids");
 
 const { SECRETS } = require('./config');
+const { verifySignature } = require('./utils/auth');
 
 const createServer = () => {
   const client = new Client({
@@ -36,17 +37,14 @@ const createServer = () => {
     app.use(
       '/payload',
       (req, res, next) => {
-        const { authorization } = req.headers;
-        const token = authorization && authorization.split(' ')[1];
-        if (token !== null) {
-          try {
-            if (token !== SECRETS.WEBHOOK_API_TOKEN) {
-              return res.status(403).json({ error: 'Forbidden' });
-            }
-            next();
-          } catch (err) {
-            return;
+        try {
+          if (!verifySignature(req)) {
+            return res.status(403).send('Forbidden');
           }
+          req.CLIENT = client;
+          next();
+        } catch (err) {
+          return res.status(403).send('Forbidden');
         }
       },
       PAYLOAD_ROUTER,
@@ -103,7 +101,7 @@ const createServer = () => {
             }
             next();
           } catch (err) {
-            return;
+            return res.status(403).json({ error: 'Forbidden' });
           }
         }
       },
