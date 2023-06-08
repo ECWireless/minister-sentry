@@ -36,7 +36,7 @@ PAYLOAD_ROUTER.post('/', (req, res) => {
 
         req.CLIENT.guilds.cache
           .get(SECRETS.GUILD_ID)
-          .channels.cache.get(SECRETS.RIP_DISCUSSIONS_CHANNEL_ID)
+          .channels.cache.get(SECRETS.OPS_CHANNEL_ID)
           .send({ embeds: [embed] });
       }
     }
