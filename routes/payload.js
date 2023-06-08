@@ -7,11 +7,24 @@ const { SECRETS } = require('../config');
 const PAYLOAD_ROUTER = express.Router();
 
 PAYLOAD_ROUTER.post('/', (req, res) => {
+  const { html_url, title } = req.body.issue;
+  const { name } = req.body.label;
+  const { LIBRARY_CHANNEL_ID, OPS_CHANNEL_ID } = SECRETS;
+
+  if (!html_url || !title || !name) {
+    discordLogger('ERROR: missing request data.');
+    return res.json('ERROR: Missing html_url or title or name');
+  }
+
+  if (!LIBRARY_CHANNEL_ID || !OPS_CHANNEL_ID) {
+    discordLogger('ERROR: missing envs.');
+    return res.json(
+      'ERROR: Missing LIBRARY_CHANNEL_ID or OPS_CHANNEL_ID env variables',
+    );
+  }
+
   try {
     if (req.body.action === 'labeled') {
-      const { html_url, title } = req.body.issue;
-      const { name } = req.body.label;
-
       if (name === 'apprentice-issue') {
         const embed = new Discord.MessageEmbed()
           .setColor('#ff3864')
@@ -41,10 +54,11 @@ PAYLOAD_ROUTER.post('/', (req, res) => {
       }
     }
 
-    res.send('Received');
+    return res.send('Received');
   } catch (err) {
     console.log(err);
     discordLogger('Error caught in proposal alert.');
+    return res.send('Error');
   }
 });
 
