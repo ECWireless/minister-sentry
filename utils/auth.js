@@ -9,7 +9,10 @@ const verifySignature = req => {
     .digest('hex');
 
   console.log('signature', `sha256=${signature}`);
-  console.log('x-hub-signature-256', req.headers);
+  const signature2 = req.headers['x-hub-signature-256'];
+  console.log('x-hub-signature-256', signature2);
+  const signature3 = req.headers.get('x-hub-signature-256');
+  console.log('x-hub-signature-256', signature3);
   return `sha256=${signature}` === req.headers.get('x-hub-signature-256');
 };
 
