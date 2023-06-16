@@ -6,11 +6,133 @@ const axios = require('axios');
 const { discordLogger } = require('../utils/logger');
 const { SECRETS } = require('../config');
 const { getUserbyUsername } = require('../lib/users');
-const { rolesHasuraToDiscord } = require('../utils/constants');
+const {
+  rolesHasuraToDiscord,
+  PROJECT_TYPE_MAP,
+  BUDGET_RANGE_MAP,
+  SERVICES_MAP,
+} = require('../utils/constants');
 
 dotenv.config();
 
 const HASURA_ROUTER = express.Router();
+
+HASURA_ROUTER.post('/consultation-submission', async (req, res) => {
+  const { id } = req.body;
+  const { HASURA_GRAPHQL_ENDPOINT, HASURA_GRAPHQL_ADMIN_SECRET } = SECRETS;
+
+  if (!HASURA_GRAPHQL_ENDPOINT || !HASURA_GRAPHQL_ADMIN_SECRET) {
+    discordLogger('ERROR: missing envs.');
+    return res.json(
+      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET env variables',
+    );
+  }
+
+  if (!id) {
+    discordLogger('ERROR: missing request data.');
+    return res.json('ERROR: Missing id');
+  }
+
+  try {
+    const query = `
+      query ConsultationQuery {
+        consultations(where: {id: {_eq: "${id}"}}) {
+          name
+          link
+          project_type {
+            project_type
+          }
+          consultations_services_required {
+            guild_service_key
+          }
+          budget_key
+          consultations_contacts {
+            contact {
+              name
+              contact_info {
+                discord
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const headers = {
+      'x-hasura-admin-secret': HASURA_GRAPHQL_ADMIN_SECRET,
+    };
+
+    const response = await axios({
+      url: HASURA_GRAPHQL_ENDPOINT,
+      method: 'post',
+      headers,
+      data: {
+        query,
+      },
+    });
+
+    if (response.data.errors) {
+      console.log(response.data.errors);
+      discordLogger('ERROR: issue querying DM API.');
+      return res.json('ERROR');
+    }
+
+    const consultation = response.data.data.consultations[0];
+
+    const projectName = consultation.name;
+    const name = consultation.consultations_contacts[0].contact.name;
+    const projectType =
+      PROJECT_TYPE_MAP[consultation.project_type.project_type];
+    const projectLink = consultation.link;
+    const budgetRange = BUDGET_RANGE_MAP[consultation.budget_key];
+    const services = consultation.consultations_services_required.map(
+      service => SERVICES_MAP[service.guild_service_key],
+    );
+    const discord =
+      consultation.consultations_contacts[0].contact.contact_info.discord;
+
+    const embed = new MessageEmbed()
+      .setColor('#ff3864')
+      .setTitle(projectName)
+      .setAuthor(name)
+      .setURL(`https://dm.raidguild.org/consultations/${id}`)
+      .addFields(
+        {
+          name: 'Project Type',
+          value: projectType,
+        },
+        {
+          name: 'Specs Link',
+          value: projectLink || 'None Provided',
+        },
+
+        {
+          name: 'Budget Range',
+          value: budgetRange,
+        },
+        {
+          name: 'Services Required',
+          value: services.join(', '),
+        },
+        {
+          name: 'Discord',
+          value: discord || 'Not Provided',
+        },
+      )
+      .setTimestamp();
+
+    await req.CLIENT.guilds.cache
+      .get(SECRETS.GUILD_ID)
+      .channels.cache.get(SECRETS.CLIENT_SUBMISSION_CHANNEL_ID)
+      .send({ embeds: [embed] });
+
+    return res.json('SUCCESS');
+  } catch (err) {
+    console.log(err);
+    discordLogger('Error sending new consultation application notification.');
+    return res.json('ERROR');
+  }
+});
 
 HASURA_ROUTER.post('/create-channels', async (req, res) => {
   const { name, id } = req.body;
