@@ -3,7 +3,7 @@ const { verify } = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 
-// const PAYLOAD_ROUTER = require("./routes/payload");
+const PAYLOAD_ROUTER = require('./routes/payload');
 const HIREUS_V2_ROUTER = require('./routes/hireus-v2');
 // const ESCROW_ROUTER = require("./routes/escrow");
 const JOINUS_ROUTER = require('./routes/joinus');
@@ -12,6 +12,7 @@ const HASURA_ROUTER = require('./routes/hasura');
 // const subscribeEvent = require("./features/bids");
 
 const { SECRETS } = require('./config');
+const { verifySignature } = require('./utils/auth');
 
 const createServer = () => {
   const client = new Client({
@@ -33,14 +34,21 @@ const createServer = () => {
     app.use(express.json());
     app.use(cors());
 
-    // app.use(
-    //   "/payload",
-    //   (req, res, next) => {
-    //     req.CLIENT = client;
-    //     next();
-    //   },
-    //   PAYLOAD_ROUTER
-    // );
+    app.use(
+      '/payload',
+      (req, res, next) => {
+        try {
+          if (!verifySignature(req)) {
+            return res.status(403).send('Forbidden');
+          }
+          req.CLIENT = client;
+          next();
+        } catch (err) {
+          return res.status(403).send('Forbidden');
+        }
+      },
+      PAYLOAD_ROUTER,
+    );
 
     app.use(
       '/hireus-v2',
@@ -88,12 +96,12 @@ const createServer = () => {
         const token = authorization && authorization.split(' ')[1];
         if (token !== null) {
           try {
-            if (token !== SECRETS.HASURA_EVENTS_API_TOKEN) {
+            if (token !== SECRETS.WEBHOOK_API_TOKEN) {
               return res.status(403).json({ error: 'Forbidden' });
             }
             next();
           } catch (err) {
-            return;
+            return res.status(403).json({ error: 'Forbidden' });
           }
         }
       },
