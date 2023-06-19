@@ -4,6 +4,7 @@ const { MessageEmbed, Permissions } = require('discord.js');
 const axios = require('axios');
 
 const { discordLogger } = require('../utils/logger');
+const { trimString } = require('../utils/helpers');
 const { SECRETS } = require('../config');
 const { getUserbyUsername } = require('../lib/users');
 const {
@@ -128,7 +129,7 @@ HASURA_ROUTER.post('/cohort-submission', async (req, res) => {
         },
         {
           name: 'Primary Skills',
-          value: primarySkills,
+          value: primarySkills.join(', '),
         },
         {
           name: 'Availability',
