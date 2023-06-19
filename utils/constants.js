@@ -40,9 +40,49 @@ const SERVICES_MAP = {
   HELP_ME: 'Help me figure out what I need',
 };
 
+const SKILL_MAP = {
+  FRONTEND: 'Frontend Dev',
+  BACKEND: 'Backend Dev',
+  SOLIDITY: 'Solidity',
+  BIZ_DEV: 'BizDev',
+  COMMUNITY: 'Community',
+  PROJECT_MANAGEMENT: 'Project Management',
+  FINANCE: 'Finance',
+  PRODUCT_DESIGN: 'Product Design',
+  UX_RESEARCH: 'UX Research',
+  GAME_THEORY: 'Game Theory',
+  DEVOPS: 'DevOps',
+  TOKENOMICS: 'Tokenomics',
+  CONTENT: 'Content',
+  MEMES: 'Memes',
+  VISUAL_DESIGN: 'Visual Design',
+  UI_DESIGN: 'UI Design',
+  ILLUSTRATION: 'Illustration',
+  LEGAL: 'Legal',
+  ACCOUNTING: 'Accounting',
+};
+
+const SKILL_TYPE_MAP = {
+  TECHNICAL: 'Technical',
+  NON_TECHNICAL: 'Non - Technical',
+  NOT_APPLICABLE: 'Not Applicable',
+  OTHER: 'Other',
+};
+
+const AVAILABILITY_MAP = {
+  LESS_THAN_FIVE_HOURS: '0-5 hours',
+  SIX_TO_TWELVE_HOURS: '6-12 hours',
+  THIRTEEN_TO_THIRTY_FIVE_HOURS: '13-35 hours',
+  MORE_THAN_THIRTY_SIX_HOURS: '36+ hours',
+  NOT_APPLICABLE: 'Not Applicable',
+};
+
 module.exports = {
   rolesHasuraToDiscord,
   PROJECT_TYPE_MAP,
   BUDGET_RANGE_MAP,
   SERVICES_MAP,
+  SKILL_MAP,
+  SKILL_TYPE_MAP,
+  AVAILABILITY_MAP,
 };

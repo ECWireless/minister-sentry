@@ -11,11 +11,144 @@ const {
   PROJECT_TYPE_MAP,
   BUDGET_RANGE_MAP,
   SERVICES_MAP,
+  SKILL_MAP,
+  SKILL_TYPE_MAP,
+  AVAILABILITY_MAP,
 } = require('../utils/constants');
 
 dotenv.config();
 
 const HASURA_ROUTER = express.Router();
+
+HASURA_ROUTER.post('/cohort-submission', async (req, res) => {
+  const { id } = req.body;
+  const { HASURA_GRAPHQL_ENDPOINT, HASURA_GRAPHQL_ADMIN_SECRET } = SECRETS;
+
+  if (!HASURA_GRAPHQL_ENDPOINT || !HASURA_GRAPHQL_ADMIN_SECRET) {
+    discordLogger('ERROR: missing envs.');
+    return res.json(
+      'ERROR: Missing HASURA_GRAPHQL_ENDPOINT or HASURA_GRAPHQL_ADMIN_SECRET env variables',
+    );
+  }
+
+  if (!id) {
+    discordLogger('ERROR: missing request data.');
+    return res.json('ERROR: Missing id');
+  }
+
+  try {
+    const query = `
+      query ApplicationQuery {
+        applications(where: {id: {_eq: "${id}"}}) {
+          name
+          contact_info {
+            discord
+            twitter
+          }
+          applications_skills {
+            skill_type_key
+            skill_key
+          }
+          technical_skill_type_key
+          crypto_experience
+          availability_key
+          introduction
+          learning_goals
+          passion
+        }
+      }
+    `;
+
+    const headers = {
+      'x-hasura-admin-secret': HASURA_GRAPHQL_ADMIN_SECRET,
+    };
+
+    const response = await axios({
+      url: HASURA_GRAPHQL_ENDPOINT,
+      method: 'post',
+      headers,
+      data: {
+        query,
+      },
+    });
+
+    if (response.data.errors) {
+      console.log(response.data.errors);
+      discordLogger('ERROR: issue querying DM API.');
+      return res.json('ERROR');
+    }
+
+    const application = response.data.data.applications[0];
+
+    const name = application.name;
+    const discord = application.contact_info.discord;
+    const twitter = application.contact_info.twitter;
+    const classType = SKILL_TYPE_MAP[application.technical_skill_type_key];
+    const bio = application.introduction;
+    const goals = application.learning_goals;
+    const passion = application.passion;
+    const cryptoExp = application.crypto_experience;
+    const primarySkills = application.applications_skills
+      .filter(skill => skill.skill_type_key === 'PRIMARY')
+      .map(skill => SKILL_MAP[skill.skill_key]);
+    const availability = AVAILABILITY_MAP[application.availability_key];
+
+    const embed = new MessageEmbed()
+      .setColor('#ff3864')
+      .setTitle('New Application')
+      .setAuthor(name)
+      .addFields(
+        {
+          name: 'Discord',
+          value: discord || 'N/A',
+        },
+        {
+          name: 'Twitter',
+          value: twitter || 'N/A',
+        },
+        {
+          name: 'Class Type',
+          value: classType,
+        },
+        {
+          name: 'Bio',
+          value: trimString(bio, 1024),
+        },
+        {
+          name: 'Goals',
+          value: trimString(goals, 1024),
+        },
+        {
+          name: 'Passion',
+          value: trimString(passion, 1024),
+        },
+        {
+          name: 'Experience in Crypto',
+          value: cryptoExp.toString(),
+        },
+        {
+          name: 'Primary Skills',
+          value: primarySkills,
+        },
+        {
+          name: 'Availability',
+          value: availability,
+        },
+      )
+      .setTimestamp();
+
+    req.CLIENT.guilds.cache
+      .get(SECRETS.GUILD_ID)
+      .channels.cache.get(SECRETS.COHORT_SUBMISSIONS_CHANNEL_ID)
+      .send({ embeds: [embed] });
+
+    return res.json('SUCCESS');
+  } catch (err) {
+    console.log(err);
+    discordLogger('Error sending new cohort application notification.');
+    return res.json('ERROR');
+  }
+});
 
 HASURA_ROUTER.post('/consultation-submission', async (req, res) => {
   const { id } = req.body;
