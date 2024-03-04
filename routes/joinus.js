@@ -3,14 +3,12 @@ const Discord = require('discord.js');
 const dotenv = require('dotenv');
 
 const { discordLogger } = require('../utils/logger');
+const { trimString } = require('../utils/helpers');
 const { SECRETS } = require('../config');
 
 dotenv.config();
 
 const JOINUS_ROUTER = express.Router();
-
-const trimString = (str, max) =>
-  str.length > max ? `${str.slice(0, max - 3)}...` : str;
 
 JOINUS_ROUTER.post('/application', async (req, res) => {
   const {
