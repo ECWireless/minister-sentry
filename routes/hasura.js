@@ -509,7 +509,8 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
     }
 
     await whoIsAvailableChannel.send(
-      `The role <@&${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details at https://dm.raidguild.org/raids/${raid_id}`,
+      `The role <@&${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details [here](https://dm.raidguild.org/raids/${raid_id})`,
+      { embeds: [] },
     );
 
     return res.json('SUCCESS');
@@ -616,7 +617,8 @@ HASURA_ROUTER.post('/status-updated', async (req, res) => {
   try {
     const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
     await raidChannel.send(
-      `The status of this raid has been updated to: ${status_key}\n\nView raid details at https://dm.raidguild.org/raids/${id}`,
+      `The status of this [raid](https://dm.raidguild.org/raids/${id}) has been updated to: ${status_key}`,
+      { embeds: [] },
     );
 
     return res.json('SUCCESS');
