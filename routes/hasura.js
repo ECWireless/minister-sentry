@@ -1,6 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const { MessageEmbed, Permissions } = require('discord.js');
+const { MessageEmbed, Permissions, MessageFlags } = require('discord.js');
 const axios = require('axios');
 
 const { discordLogger } = require('../utils/logger');
@@ -508,10 +508,13 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
       return res.json('ERROR: Could not find role ID in discord');
     }
 
-    await whoIsAvailableChannel.send(
+    const message = await whoIsAvailableChannel.send(
       `The role <@&${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details [here](https://dm.raidguild.org/raids/${raid_id})`,
-      { embeds: [] },
     );
+
+    await message.edit({
+      flags: MessageFlags.SuppressEmbeds,
+    });
 
     return res.json('SUCCESS');
   } catch (err) {
@@ -616,10 +619,13 @@ HASURA_ROUTER.post('/status-updated', async (req, res) => {
 
   try {
     const raidChannel = req.CLIENT.channels.cache.get(raid_channel_id);
-    await raidChannel.send(
+    const message = await raidChannel.send(
       `The status of this [raid](https://dm.raidguild.org/raids/${id}) has been updated to: ${status_key}`,
-      { embeds: [] },
     );
+
+    await message.edit({
+      flags: MessageFlags.SuppressEmbeds,
+    });
 
     return res.json('SUCCESS');
   } catch (err) {
