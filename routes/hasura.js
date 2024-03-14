@@ -511,10 +511,7 @@ HASURA_ROUTER.post('/role-added', async (req, res) => {
     const message = await whoIsAvailableChannel.send(
       `The role <@&${roleDiscordId}> is needed for "${name}"\n\nPlease reach out to the Cleric to join the raid party.\n\nView raid details [here](https://dm.raidguild.org/raids/${raid_id})`,
     );
-
-    await message.edit({
-      flags: MessageFlags.SuppressEmbeds,
-    });
+    await message.suppressEmbeds(true);
 
     return res.json('SUCCESS');
   } catch (err) {
@@ -623,9 +620,7 @@ HASURA_ROUTER.post('/status-updated', async (req, res) => {
       `The status of this [raid](https://dm.raidguild.org/raids/${id}) has been updated to: ${status_key}`,
     );
 
-    await message.edit({
-      flags: MessageFlags.SuppressEmbeds,
-    });
+    await message.suppressEmbeds(true);
 
     return res.json('SUCCESS');
   } catch (err) {
